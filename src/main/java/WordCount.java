@@ -1,6 +1,8 @@
 /**
  * Created by aliHitawala on 10/11/16.
  */
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
 import scala.Tuple2;
 
 import org.apache.spark.api.java.JavaPairRDD;
@@ -25,10 +27,16 @@ public final class WordCount {
             System.exit(1);
         }
 
-        SparkSession spark = SparkSession
-                .builder()
-                .appName("JavaWordCount")
-                .getOrCreate();
+        SparkConf conf = new SparkConf()
+                .setMaster("10.254.0.53:7077")
+                .setAppName("CS-838-Assignment2-PartA-1")
+                .set("spark.driver.memory", "1g")
+                .set("spark.eventLog.enabled", "true")
+                .set("spark.eventLog.dir", "file:///tmp/spark-events")
+                .set("spark.executor.memory", "1g")
+                .set("spark.executor.cores", "4")
+                .set("spark.task.cpus", "1");
+        SparkSession spark = new SparkSession(SparkContext.getOrCreate(conf));
 
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
