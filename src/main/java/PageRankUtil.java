@@ -8,6 +8,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class PageRankUtil {
                     }
                 }).distinct().groupByKey();
         if (isCaching) {
-            links = links.cache();
+            links = links.persist(StorageLevel.MEMORY_AND_DISK());
         }
         if (isPartition) {
             links = links.partitionBy(new CustomPartitioner());
