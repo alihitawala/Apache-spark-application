@@ -28,11 +28,11 @@ public final class WordCount {
         }
 
         SparkConf conf = new SparkConf()
-                .setMaster("spark://10.254.0.53:7077")
+                .setMaster("local[2]")
                 .setAppName("CS-838-Assignment2-PartA-1")
                 .set("spark.driver.memory", "1g")
-                .set("spark.eventLog.enabled", "true")
-                .set("spark.eventLog.dir", "hdfs:/tmp/spark-events")
+//                .set("spark.eventLog.enabled", "true")
+//                .set("spark.eventLog.dir", "hdfs:/tmp/spark-events")
                 .set("spark.executor.memory", "1g")
                 .set("spark.executor.cores", "4")
                 .set("spark.task.cpus", "1");
@@ -48,7 +48,6 @@ public final class WordCount {
 
         JavaPairRDD<String, Integer> ones = words.mapToPair(
                 new PairFunction<String, String, Integer>() {
-                    @Override
                     public Tuple2<String, Integer> call(String s) {
                         return new Tuple2<String, Integer>(s, 1);
                     }
