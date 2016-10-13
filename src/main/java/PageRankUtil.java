@@ -47,7 +47,10 @@ public class PageRankUtil {
                     }
                 }).distinct().groupByKey();
         if (isCaching) {
-            links.cache();
+            links = links.cache();
+        }
+        if (isPartition) {
+            links = links.partitionBy(new CustomPartitioner());
         }
         JavaPairRDD<String, Double> ranks = links.mapValues(new Function<Iterable<String>, Double>() {
             public Double call(Iterable<String> rs) {
