@@ -28,11 +28,11 @@ public final class WordCount {
         }
 
         SparkConf conf = new SparkConf()
-                .setMaster("10.254.0.53:7077")
+                .setMaster("spark://10.254.0.53:7077")
                 .setAppName("CS-838-Assignment2-PartA-1")
                 .set("spark.driver.memory", "1g")
                 .set("spark.eventLog.enabled", "true")
-                .set("spark.eventLog.dir", "file:///tmp/spark-events")
+                .set("spark.eventLog.dir", "hdfs:/tmp/spark-events")
                 .set("spark.executor.memory", "1g")
                 .set("spark.executor.cores", "4")
                 .set("spark.task.cpus", "1");
