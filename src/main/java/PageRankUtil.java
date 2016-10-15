@@ -46,7 +46,7 @@ public class PageRankUtil {
                         String[] parts = SPACES.split(s);
                         return new Tuple2<String, String>(parts[0], parts[1]);
                     }
-                }).distinct().groupByKey();
+                }).groupByKey();
         if (isCaching) {
             links = links.persist(StorageLevel.MEMORY_AND_DISK());
         }
