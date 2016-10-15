@@ -4,15 +4,20 @@ import org.apache.spark.Partitioner;
  * Created by aliHitawala on 10/12/16.
  */
 public class CustomPartitioner extends Partitioner {
-    public static final int NUM_PARTITION = 100;
+    public int partitions;
+
+    public CustomPartitioner(int partitions) {
+        this.partitions = partitions;
+    }
+
     @Override
     public int numPartitions() {
-        return NUM_PARTITION;
+        return this.partitions;
     }
 
     @Override
     public int getPartition(Object o) {
         String v = (String) o;
-        return Integer.parseInt(v) % NUM_PARTITION;
+        return Integer.parseInt(v) % this.partitions;
     }
 }

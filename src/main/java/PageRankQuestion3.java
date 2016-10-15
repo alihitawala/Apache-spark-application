@@ -8,6 +8,6 @@ public final class PageRankQuestion3 {
             System.err.println("Usage: PageRankQuestion3 <file> <number_of_iterations>");
             System.exit(1);
         }
-        PageRankUtil.runAlgorithm(args[0], Integer.parseInt(args[1]), "CS-838-Assignment2-PartA-Question3", true, true);
+        PageRankUtil.runAlgorithm(args[0], Integer.parseInt(args[1]), "CS-838-Assignment2-PartA-Question3", true, true, 100);
     }
 }

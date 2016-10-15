@@ -28,7 +28,7 @@ public class PageRankUtil {
         }
     }
 
-    public static void runAlgorithm(String inputFile, int iterations, String appName, boolean isPartition, boolean isCaching) {
+    public static void runAlgorithm(String inputFile, int iterations, String appName, boolean isPartition, boolean isCaching, int numPartitions) {
         SparkConf conf = new SparkConf()
                 .setMaster("spark://10.254.0.53:7077")
                 .setAppName(appName)
@@ -51,7 +51,7 @@ public class PageRankUtil {
             links = links.persist(StorageLevel.MEMORY_AND_DISK());
         }
         if (isPartition) {
-            links = links.partitionBy(new CustomPartitioner());
+            links = links.partitionBy(new CustomPartitioner(numPartitions));
         }
         JavaPairRDD<String, Double> ranks = links.mapValues(new Function<Iterable<String>, Double>() {
             public Double call(Iterable<String> rs) {
