@@ -76,7 +76,7 @@ public class PageRankUtil {
                 }
             });
         }
-        ranks.collect();
+        ranks.saveAsTextFile("hdfs:/home/ubuntu/output");
         spark.stop();
     }
 }
