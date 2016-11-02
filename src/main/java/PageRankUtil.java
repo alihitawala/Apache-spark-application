@@ -32,14 +32,19 @@ public class PageRankUtil {
         SparkConf conf = new SparkConf()
                 .setMaster("spark://10.254.0.53:7077")
                 .setAppName(appName)
-                .set("spark.driver.memory", "1g")
+                .set("spark.driver.memory", "8g")
+                .set("spark.driver.cores", "2")
                 .set("spark.eventLog.enabled", "true")
                 .set("spark.eventLog.dir", "hdfs:/tmp/spark-events")
-                .set("spark.executor.memory", "1g")
-                .set("spark.executor.cores", "4")
+                .set("spark.executor.memory", "4g")
+                .set("spark.executor.cores", "1")
+                .set("spark.executor.instances","20")
                 .set("spark.task.cpus", "1");
         SparkSession spark = new SparkSession(SparkContext.getOrCreate(conf));
         JavaRDD<String> lines = spark.read().textFile(inputFile).javaRDD();
+        if (isPartition) {
+            lines = lines. repartition(numPartitions);
+        }
         JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(
                 new PairFunction<String, String, String>() {
                     public Tuple2<String, String> call(String s) {
@@ -48,7 +53,7 @@ public class PageRankUtil {
                     }
                 }).groupByKey();
         if (isCaching) {
-            links = links.persist(StorageLevel.MEMORY_AND_DISK());
+            links = links.persist(StorageLevel.MEMORY_ONLY());
         }
         if (isPartition) {
             links = links.partitionBy(new CustomPartitioner(numPartitions));
