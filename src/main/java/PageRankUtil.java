@@ -41,10 +41,7 @@ public class PageRankUtil {
                 .set("spark.executor.instances","20")
                 .set("spark.task.cpus", "1");
         SparkSession spark = new SparkSession(SparkContext.getOrCreate(conf));
-        JavaRDD<String> lines = spark.read().textFile(inputFile).javaRDD();
-        if (isPartition) {
-            lines = lines. repartition(numPartitions);
-        }
+        JavaRDD<String> lines = spark.read().textFile(inputFile).javaRDD().repartition(20);
         JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(
                 new PairFunction<String, String, String>() {
                     public Tuple2<String, String> call(String s) {

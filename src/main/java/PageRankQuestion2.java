@@ -4,7 +4,7 @@
 public final class PageRankQuestion2 {
 
     public static void main(String[] args) throws Exception {
-        int numPartition = 100;
+        int numPartition = 20;
         if (args.length < 2) {
             System.err.println("Usage: PageRankQuestion2 <file> <number_of_iterations>");
             System.exit(1);
