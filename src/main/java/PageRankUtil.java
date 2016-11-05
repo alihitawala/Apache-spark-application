@@ -49,17 +49,18 @@ public class PageRankUtil {
                         return new Tuple2<String, String>(parts[0], parts[1]);
                     }
                 }).groupByKey();
-        if (isCaching) {
-            links = links.persist(StorageLevel.MEMORY_ONLY());
-        }
-        if (isPartition) {
-            links = links.partitionBy(new CustomPartitioner(numPartitions));
-        }
         JavaPairRDD<String, Double> ranks = links.mapValues(new Function<Iterable<String>, Double>() {
             public Double call(Iterable<String> rs) {
                 return 1.0;
             }
         });
+        if (isPartition) {
+            links = links.partitionBy(new CustomPartitioner(numPartitions));
+            ranks = ranks.partitionBy(new CustomPartitioner(numPartitions));
+        }
+        if (isCaching) {
+            links = links.persist(StorageLevel.MEMORY_ONLY());
+        }
         for (int current = 0; current < iterations; current++) {
             JavaPairRDD<String, Double> contribs = links.join(ranks).values()
                     .flatMapToPair(new PairFlatMapFunction<Tuple2<Iterable<String>, Double>, String, Double>() {
