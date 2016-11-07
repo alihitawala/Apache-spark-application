@@ -32,25 +32,35 @@ public class PageRankUtil {
         SparkConf conf = new SparkConf()
                 .setMaster("spark://10.254.0.53:7077")
                 .setAppName(appName)
-                .set("spark.driver.memory", "8g")
-                .set("spark.driver.cores", "2")
+                .set("spark.driver.memory", "4g")
+                .set("spark.driver.cores", "1")
                 .set("spark.eventLog.enabled", "true")
                 .set("spark.eventLog.dir", "hdfs:/tmp/spark-events")
                 .set("spark.executor.memory", "4g")
                 .set("spark.executor.cores", "1")
-                .set("spark.executor.instances","20")
+                .set("spark.executor.instances","19")
                 .set("spark.task.cpus", "1");
         SparkSession spark = new SparkSession(SparkContext.getOrCreate(conf));
         JavaRDD<String> lines = spark.read().textFile(inputFile).javaRDD().repartition(20);
         JavaPairRDD<String, Iterable<String>> links;
         if (isPartition) {
-            links = lines.mapToPair(
-                new PairFunction<String, String, String>() {
-                    public Tuple2<String, String> call(String s) {
-                        String[] parts = SPACES.split(s);
-                        return new Tuple2<String, String>(parts[0], parts[1]);
-                    }
-                }).groupByKey(new CustomPartitioner(numPartitions));
+            if (isCaching) {
+                links = lines.mapToPair(
+                        new PairFunction<String, String, String>() {
+                            public Tuple2<String, String> call(String s) {
+                                String[] parts = SPACES.split(s);
+                                return new Tuple2<String, String>(parts[0], parts[1]);
+                            }
+                        }).groupByKey(new CustomPartitioner(numPartitions)).persist(StorageLevel.MEMORY_ONLY());
+            } else {
+                links = lines.mapToPair(
+                        new PairFunction<String, String, String>() {
+                            public Tuple2<String, String> call(String s) {
+                                String[] parts = SPACES.split(s);
+                                return new Tuple2<String, String>(parts[0], parts[1]);
+                            }
+                        }).groupByKey(new CustomPartitioner(numPartitions));
+            }
         } else {
             links = lines.mapToPair(
                 new PairFunction<String, String, String>() {
@@ -60,17 +70,11 @@ public class PageRankUtil {
                     }
                 }).groupByKey();
         }
-        if (isCaching) {
-            links = links.persist(StorageLevel.MEMORY_ONLY());
-        }
         JavaPairRDD<String, Double> ranks = links.mapValues(new Function<Iterable<String>, Double>() {
             public Double call(Iterable<String> rs) {
                 return 1.0;
             }
         });
-//        if (isPartition) {
-//            ranks = ranks.partitionBy(new CustomPartitioner(numPartitions));
-//        }
         for (int current = 0; current < iterations; current++) {
             JavaPairRDD<String, Double> contribs = links.join(ranks).values()
                     .flatMapToPair(new PairFlatMapFunction<Tuple2<Iterable<String>, Double>, String, Double>() {
