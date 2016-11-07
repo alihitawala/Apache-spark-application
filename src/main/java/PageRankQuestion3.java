@@ -12,6 +12,6 @@ public final class PageRankQuestion3 {
         if (args.length == 3) {
             numPartition = Integer.parseInt(args[2]);
         }
-        PageRankUtil.runAlgorithm(args[0], Integer.parseInt(args[1]), "CS-838-Assignment2-PartA-Question3", true, true, numPartition);
+        PageRankUtil.runAlgorithm(args[0], Integer.parseInt(args[1]), "CS-838-Assignment2-PartA-Question3_"+numPartition, true, true, numPartition);
     }
 }
