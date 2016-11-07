@@ -42,18 +42,23 @@ public class PageRankUtil {
                 .set("spark.task.cpus", "1");
         SparkSession spark = new SparkSession(SparkContext.getOrCreate(conf));
         JavaRDD<String> lines = spark.read().textFile(inputFile).javaRDD().repartition(20);
-        JavaPairRDD<String, String> links_temp = lines.mapToPair(
+        JavaPairRDD<String, Iterable<String>> links;
+        if (isPartition) {
+            links = lines.mapToPair(
                 new PairFunction<String, String, String>() {
                     public Tuple2<String, String> call(String s) {
                         String[] parts = SPACES.split(s);
                         return new Tuple2<String, String>(parts[0], parts[1]);
                     }
-                });
-        JavaPairRDD<String, Iterable<String>> links;
-        if (isPartition) {
-            links = links_temp.groupByKey(new CustomPartitioner(numPartitions));
+                }).groupByKey(new CustomPartitioner(numPartitions));
         } else {
-            links = links_temp.groupByKey();
+            links = lines.mapToPair(
+                new PairFunction<String, String, String>() {
+                    public Tuple2<String, String> call(String s) {
+                        String[] parts = SPACES.split(s);
+                        return new Tuple2<String, String>(parts[0], parts[1]);
+                    }
+                }).groupByKey();
         }
         if (isCaching) {
             links = links.persist(StorageLevel.MEMORY_ONLY());
